@@ -1,7 +1,8 @@
 /* ==========================================================
    点赞模块
    - 每人每天最多点赞 10 次（按浏览器/设备统计）
-   - 默认使用本地计数；如需全网统一统计，接入后端即可
+   - 总点赞数接入 Supabase 实现全网统一统计
+   - 未配置 Supabase 密钥时自动降级为本地计数
    ========================================================== */
 
 (function () {
@@ -11,22 +12,65 @@
   const STATE_KEY = "yuteria_likes_state"; // { date: "YYYY-MM-DD", used: n }
   const LOCAL_TOTAL_KEY = "yuteria_likes_total"; // 本地兜底总数
 
-  /* ---------- 计数后端（可替换） ----------
-     当前默认本地计数：每台设备的点赞各自统计。
-     想变成全网真实统计时，在这里换成后端接口即可，例如：
-     const BACKEND = {
-       async get() { const r = await fetch("你的后端/get"); return (await r.json()).value; },
-       async hit() { const r = await fetch("你的后端/hit"); return (await r.json()).value; }
-     };
+  /* ---------- Supabase 后端配置 ----------
+     1. 注册 supabase.com（免费），新建项目
+     2. 在项目 SQL Editor 里运行仓库中的 supabase-setup.sql
+     3. 把下面两个值换成你项目的（Project Settings → API）：
+        SUPABASE_URL  = Project URL，形如 https://xxxx.supabase.co
+        SUPABASE_KEY  = Publishable key（旧版叫 anon key，可公开，安全）
+     注意：不要使用 service_role key，绝不能放进网站。
   */
+  const SUPABASE_URL = "https://mfgmvnpapndqmudfxdxa.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_uvbGsf4aLqPASyrjkrwAAg_Ov2JGkPn";
+
   const BACKEND = {
     async get() {
-      return null;
+      if (!SUPABASE_KEY) return null;
+      try {
+        const r = await fetch(SUPABASE_URL + "/rest/v1/likes?select=count", {
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: "Bearer " + SUPABASE_KEY
+          }
+        });
+        if (!r.ok) return null;
+        const data = await r.json();
+        const n = Number(data && data[0] && data[0].count);
+        return Number.isFinite(n) ? n : null;
+      } catch {
+        return null;
+      }
     },
     async hit() {
-      return null;
+      if (!SUPABASE_KEY) return null;
+      try {
+        const r = await fetch(SUPABASE_URL + "/rest/v1/rpc/add_like", {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: "Bearer " + SUPABASE_KEY,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ p_visitor: visitorId() })
+        });
+        if (!r.ok) return null;
+        return await r.json(); // { total, used }
+      } catch {
+        return null;
+      }
     }
   };
+
+  function visitorId() {
+    let id = store.get("yuteria_visitor");
+    if (!id) {
+      id =
+        (window.crypto && window.crypto.randomUUID && window.crypto.randomUUID()) ||
+        Date.now().toString(36) + Math.random().toString(36).slice(2);
+      store.set("yuteria_visitor", id);
+    }
+    return id;
+  }
 
   /* ---------- 安全存储（隐私模式下不报错） ---------- */
   const store = {
@@ -147,11 +191,16 @@
     spawnParticles();
     renderTotal(total + 1);
 
-    // 若接入了后端，用后端返回的真实总数覆盖
-    const next = await BACKEND.hit();
-    if (typeof next === "number") {
-      renderTotal(next);
-      store.set(LOCAL_TOTAL_KEY, String(next));
+    // 后端返回 { total, used }：用真实总数覆盖，并同步服务端的当日次数
+    const res = await BACKEND.hit();
+    if (res && typeof res.total === "number") {
+      renderTotal(res.total);
+      store.set(LOCAL_TOTAL_KEY, String(res.total));
+      if (typeof res.used === "number") {
+        state.used = Math.min(DAILY_LIMIT, Math.max(state.used, res.used));
+        saveState(state);
+        renderToday();
+      }
     } else {
       store.set(LOCAL_TOTAL_KEY, String(total));
     }
