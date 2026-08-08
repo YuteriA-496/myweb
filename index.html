@@ -229,6 +229,28 @@
         </div>
       </div>
     </section>
+
+    <!-- ======= 点赞 ======= -->
+    <section class="section" id="likes">
+      <div class="container likes-wrap">
+        <p class="section-tag reveal">点赞</p>
+        <h2 class="section-title reveal">喜欢就点个赞吧</h2>
+        <div class="likes-box card reveal" id="likes-box">
+          <div class="like-particles" id="like-particles" aria-hidden="true"></div>
+          <button class="like-btn" id="like-btn" aria-label="点赞">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.3l7.8-7.9 1-1a5.5 5.5 0 0 0 0-7.8Z" />
+            </svg>
+          </button>
+          <div class="like-count">
+            <strong id="like-total">0</strong>
+            <span>总点赞</span>
+          </div>
+          <p class="like-today" id="like-today">今日还可点赞 10 次</p>
+          <p class="like-hint">每人每天最多 10 次，欢迎常来～</p>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- ======= 页脚 ======= -->
@@ -252,5 +274,6 @@
   </footer>
 
   <script src="script.js"></script>
+  <script src="likes.js"></script>
 </body>
 </html>
