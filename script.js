@@ -83,7 +83,7 @@
     const message = form.message.value.trim();
     const subject = encodeURIComponent("来自个人网站的留言");
     const body = encodeURIComponent("姓名：" + name + "\n邮箱：" + email + "\n\n" + message);
-    window.location.href = "mailto:your@email.com?subject=" + subject + "&body=" + body;
+    window.location.href = "mailto:yuteria.x@foxmail.com?subject=" + subject + "&body=" + body;
   });
 
   /* ---------- 页脚年份 ---------- */
