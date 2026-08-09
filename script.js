@@ -74,16 +74,58 @@
     revealEls.forEach((el) => el.classList.add("visible"));
   }
 
-  /* ---------- 联系表单：生成邮件链接 ---------- */
+  /* ---------- 联系表单：留言写入 Supabase（替代 mailto，不依赖本地邮件客户端） ---------- */
+  const SUPABASE_URL = "https://mfgmvnpapndqmudfxdxa.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_uvbGsf4aLqPASyrjkrwAAg_Ov2JGkPn";
+
   const form = document.getElementById("contact-form");
-  form.addEventListener("submit", (event) => {
+  const formName = document.getElementById("form-name");
+  const formEmail = document.getElementById("form-email");
+  const formMessage = document.getElementById("form-message");
+  const formStatus = document.getElementById("form-status");
+  const formSubmit = document.getElementById("form-submit");
+
+  function showStatus(text, type) {
+    formStatus.textContent = text;
+    formStatus.className = "form-status " + type;
+  }
+
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const name = form.name.value.trim();
-    const email = form.email.value.trim();
-    const message = form.message.value.trim();
-    const subject = encodeURIComponent("来自个人网站的留言");
-    const body = encodeURIComponent("姓名：" + name + "\n邮箱：" + email + "\n\n" + message);
-    window.location.href = "mailto:yuteria.x@foxmail.com?subject=" + subject + "&body=" + body;
+    const name = formName.value.trim();
+    const email = formEmail.value.trim();
+    const message = formMessage.value.trim();
+
+    if (!name || !email || !message) {
+      showStatus("请把名字、邮箱和想说的话都填上～", "error");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showStatus("邮箱格式不太对，检查一下？", "error");
+      return;
+    }
+
+    formSubmit.disabled = true;
+    showStatus("正在发送…", "info");
+    try {
+      const res = await fetch(SUPABASE_URL + "/rest/v1/messages", {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: "Bearer " + SUPABASE_KEY,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal"
+        },
+        body: JSON.stringify({ name, email, message })
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      form.reset();
+      showStatus("发送成功，谢谢你的留言！", "success");
+    } catch {
+      showStatus("发送失败，请稍后再试。", "error");
+    } finally {
+      formSubmit.disabled = false;
+    }
   });
 
   /* ---------- 页脚年份 ---------- */

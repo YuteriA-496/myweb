@@ -669,10 +669,35 @@ html[data-theme="dark"] .theme-toggle .icon-moon {
 }
 
 .form-hint {
-  font-size: 12.5px;
-  color: var(--muted);
-  text-align: center;
-}
+    font-size: 12.5px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .form-status {
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    min-height: 18px;
+    margin: 10px 0 -4px;
+  }
+
+  .form-status.success {
+    color: #16a34a;
+  }
+
+  .form-status.error {
+    color: #dc2626;
+  }
+
+  .form-status.info {
+    color: var(--muted);
+  }
+
+  .contact-form .btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
 
 /* ---------- 点赞 ---------- */
 

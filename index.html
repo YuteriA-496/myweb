@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Yuteria 的个人网站——教育经历、技能与联系方式。" />
-  <title>Yuteria · 个人简历</title>
+  <title>Yuteria · 个人主页</title>
   <script>
     // 在页面绘制前确定主题，避免深浅色闪屏
     (function () {
@@ -60,7 +60,7 @@
         <h1 class="hero-title reveal"><span class="gradient-text">一直在路上</span></h1>
         <p class="hero-motto reveal">Don't be sorry, be better.</p>
         <p class="hero-subtitle reveal">
-          一名成长中的学生与创造者。这里是我的个人简历——记录走过的学校、掌握的技能，
+          一名成长中的学生与创造者。这里是我的个人主页——记录走过的学校、掌握的技能，
           以及未来想做的事。
         </p>
         <div class="hero-actions reveal">
@@ -214,8 +214,9 @@
             <label for="form-message">想说的话</label>
             <textarea id="form-message" name="message" rows="4" placeholder="有什么想聊的？" required></textarea>
 
-            <button type="submit" class="btn btn-primary">发送邮件</button>
-            <p class="form-hint">提交后会打开你的邮件客户端。</p>
+            <button type="submit" class="btn btn-primary" id="form-submit">发送留言</button>
+            <p class="form-status" id="form-status" role="status"></p>
+            <p class="form-hint">留言会直接保存到我的后台，我看到后会尽快回复你。</p>
           </form>
         </div>
       </div>
